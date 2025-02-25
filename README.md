@@ -1,14 +1,14 @@
 
-# **Project: Large Dataset Processing API**
+# **Project: Data Processing API**
 
 ## Goal:
-Build a FastAPI-based web service that processes large datasets using **Polars** and **Pandas**. 
+Build a FastAPI-based web service that processes large datasets using **Polars** and **Pandas**.
 The service should:
 - Load, clean, and aggregate data.
 - Expose a FastAPI endpoint to return processed results.
 - Write results to a JSON or Parquet file.
 
-You will compare **Polars** and **Pandas** performance, handle missing values, 
+You will compare **Polars** and **Pandas** performance, handle missing values,
 and test the API via the interactive `/docs` interface.
 
 ## **Project Structure**
@@ -33,7 +33,7 @@ data_api/
 
 ### **Features:**
 
-1. **FastAPI Endpoint**: A GET endpoint that loads, cleans, and aggregates dataset information. 
+1. **FastAPI Endpoint**: A POST endpoint that loads, cleans, and aggregates dataset information.
 2. **Dependency Management**: Use Poetry for package management.
 3. **Virtual Environment**: Use `venv` for isolated Python environments.
 4. **Data Processing**: Efficiently handle large datasets with **Polars** and **Pandas**.
@@ -47,20 +47,22 @@ data_api/
 
 1. Initialize a Python project using **Poetry**.
 2. Set up a virtual environment (`venv`) and install **FastAPI, Polars, Pandas**.
-3. Create a FastAPI boilerplate with a simple root endpoint (`/`).
 
 ### **Task 2: Data Loading**
 
-1. Create a script to load any large dataset (CSV format, minimum of 100000 rows).
+1. Create a script to load http://archive.ics.uci.edu/dataset/502/online+retail+ii.
 2. Implement functions to read datasets using both **Pandas** and **Polars**.
-3. Compare loading times and document findings.
+3. Compare loading times and document findings by creating a benchmark function that returns;
+    - data loading time
+    - aggregation time.
+
+Feel free to add any additional metrics you find interesting.
 
 ### **Task 3: Data Cleaning**
 
-1. Introduce missing values into a dataset.
-2. Implement functions to handle missing values (e.g., fill with mean, drop rows).
-3. Apply cleaning transformations using **Pandas** and **Polars**.
-4. Document which method is more efficient and why.
+1. Implement functions to handle missing values (e.g., fill with mean, drop rows).
+2. Apply cleaning transformations using **Pandas** and **Polars**.
+3. Document data cleaning process and reason behind your methodology.
 
 ### **Task 4: Data Aggregation**
 
@@ -71,12 +73,12 @@ data_api/
 
 ### **Task 5: API Integration**
 
-1. Create a FastAPI service with a `/process-data` endpoint.
+1. Create a `/process-data` endpoint.
 2. This endpoint should:
    - Load dataset
    - Clean and aggregate data
    - Return processed results in JSON format.
-3. Implement error handling for incorrect input formats.
+3. Implement error handling for invalid input formats.
 
 ### **Task 6: Saving and Retrieving Processed Data**
 
