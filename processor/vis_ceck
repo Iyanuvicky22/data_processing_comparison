@@ -1,0 +1,89 @@
+"""
+Checking Vis App
+"""
+import polars as pl
+import pandas as pd
+import numpy as np
+import plotly.express as px
+
+
+NUM_ROWS = 5000
+rng = np.random.default_rng(seed=7)
+
+buildings_data = {
+      "sqft": rng.exponential(scale=1000, size=NUM_ROWS),
+      "year": rng.integers(low=1995, high=2023, size=NUM_ROWS),
+      "building_type": rng.choice(["A", "B", "C"], size=NUM_ROWS),
+                }
+buildings_pl = pl.DataFrame(buildings_data)
+buildings_pd = pd.DataFrame(buildings_data)
+# print(buildings)
+
+# print(buildings_pd.columns.tolist())
+
+
+def viz_data(df, columns=None):
+    """
+    Function to visualize dataframes
+    and check for outliers.
+    """
+    try:
+        if isinstance(df, pd.DataFrame):
+            if columns is None:
+                columns = df.columns.tolist()
+                for col in columns:
+                    fig = px.box(df, col)
+                    fig.show()
+            else:
+                for col in columns:
+                    fig = px.box(df, col)
+                    fig.show()
+        elif isinstance(df, pl.DataFrame):
+            if columns is None:
+                columns = df.columns
+                for col in columns:
+                    fig = px.box(df, col)
+                    fig.show()
+            else:
+                for col in columns:
+                    fig = px.box(df, col)
+                    fig.show()
+    except AttributeError as e:
+        print(f'Data loaded is not a polars or pandas dataframe.\
+        It is {e}')
+
+
+def check_outliers_info(df, col):
+    """
+    Finds Outliers in a column
+
+    Args:
+        df (Dataframe): Pandas or Polars Dataframe
+    """
+    q1 = df[col].quantile(0.25)
+    q3 = df[col].quantile(0.75)
+
+    iqr = q3-q1
+
+    outliers = df[col][((df[col] < (q1 - 1.5 * iqr)) | (df[col] 
+                > (q3 + 1.5 * iqr)))]
+
+    num_of_outliers = str(len(outliers))
+    max_outlier = str(outliers.max())
+    min_outlier = str(outliers.min())
+    print(outliers)
+
+    return f'\t\tColumn Name: {df.columns}\n\
+             Total Outliers: {num_of_outliers}\n\
+             Max Outlier Value: {max_outlier}\n\
+             Min Outlier Value: {min_outlier}\n'
+
+
+# buildings_pd.rename(columns={'sqft': 'Square Root'}, inplace=True)
+# print(buildings_pd.name)
+# print(viz_data(buildings_pl))
+# print(check_outliers_info(buildings_pl.filter(pl.col('sqft'))))
+
+# print((buildings_pl.dtypes))
+
+# print(check_outliers_info(buildings_pd, col='sqft'))
