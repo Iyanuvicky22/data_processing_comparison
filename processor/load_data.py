@@ -33,13 +33,16 @@ def compare_time(pd_func, pl_func, action='Loading Time'):
     start = time.time()
     pd_func()
     end = time.time()
-    print(f'\n{action} for pandas is: {round((end-start), 2)}')
 
     # Loading time for polars
     start_2 = time.time()
     pl_func()
     end_2 = time.time()
-    print(f'\n{action} for polars is: {round((end_2-start_2), 2)}')
+
+    res = [f'{action} for pandas is: {round((end-start), 2)}',
+           f'{action} for pandas is: {round((end_2-start_2), 2)}',
+           ]
+    return res
 
 
 if __name__ == '__main__':

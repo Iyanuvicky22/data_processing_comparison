@@ -6,17 +6,14 @@ import pandas as pd
 import polars as pl
 import numpy as np
 import plotly.express as px
-from processor import load_data as ld
 
 # Setting Display Options
 pd.set_option('display.max_columns', None)
 pl.Config.set_tbl_rows(10)
 pl.Config.set_tbl_cols(-1)
 
-COLS = ['Invoice', 'StockCode',
-        'Description', 'Quantity',
-        'InvoiceDate', 'Price',
-        'Customer ID', 'Country'
+COLS = ['Quantity',
+        'Price',
         ]
 
 
@@ -62,7 +59,7 @@ def pd_na_handler(df: pd.DataFrame):
     """
     # Handling missing values based on docstring info.
     df = df.dropna(subset=['Description'])
-    df['Customer ID'] = df['Customer ID']\
+    df.loc[:, 'Customer ID'] = df['Customer ID']\
         .ffill()
     return df
 
@@ -224,9 +221,11 @@ def handle_outlier_polars(df: pl.DataFrame, col: str, method='cap'):
             upper_limit = df[col].mean() + 3 * df[col].std()
             lower_limit = df[col].mean() - 3 * df[col].std()
             print(lower_limit, upper_limit)
+            df[col] = df[col].astype(float)
             df[col] = np.where(df[col] > upper_limit, upper_limit,
                                np.where(df[col] < lower_limit, lower_limit,
                                df[col]))
+            df[col] = df[col].astype(int)
             print(df.describe()[[col]])
             df = pl.from_pandas(df)
             return df
@@ -234,10 +233,11 @@ def handle_outlier_polars(df: pl.DataFrame, col: str, method='cap'):
             lower_limit = df[col][~(df[col] < (q1 - 1.5 * iqr))].max()
             upper_limit = df[col][~(df[col] > (q3 + 1.5 * iqr))].min()
             print(upper_limit, lower_limit)
-
+            df[col] = df[col].astype(float)
             df[col] = np.where(df[col] > upper_limit, df[col].mean(),
                                np.where(df[col] < lower_limit, df[col].mean(),
                                df[col]))
+            df[col] = df[col].astype(int)
             print(df.describe()[[col]])
             df = pl.from_pandas(df)
             return df
@@ -269,16 +269,24 @@ def transform_df(df):
             return df
         if isinstance(df, pd.DataFrame):
             columns = df.columns.tolist()
-            col = 'InvoiceDate'
-            if col in columns:
-                df = df.rename(columns={'InvoiceDate': 'InvoiceDateTime'})
-                df['InvoiceDateTime'] = pd.to_datetime(df['InvoiceDateTime'])
-                df['InvoiceDate'] = df['InvoiceDateTime'].dt.date
-                df['InvoiceTime'] = df['InvoiceDateTime'].dt.time
-                df['NameOfDay'] = df['InvoiceDateTime'].dt.day_name()
+            col = ['InvoiceDate', 'Invoice', 'StockCode']
+
+            for col in columns:
+                if col == 'InvoiceDate':
+                    df = df.rename(columns={'InvoiceDate': 'InvoiceDateTime'})
+                    df['InvoiceDateTime'] = pd.to_datetime(
+                                                          df['InvoiceDateTime']
+                                                          )
+                    df['InvoiceDate'] = df['InvoiceDateTime'].dt.date
+                    df['InvoiceTime'] = df['InvoiceDateTime'].dt.time
+                    df['NameOfDay'] = df['InvoiceDateTime'].dt.day_name()
+                if col == 'Invoice':
+                    df.loc[:, 'Invoice'] = df.loc[:, 'Invoice'].astype(str)
+                if col == 'StockCode':
+                    df.loc[:, 'StockCode'] = df.loc[:, 'StockCode'].astype(str)
             return df
     except AttributeError:
-        print('Data is not a dataframe.\
+        print('\t\tData is not a dataframe.\n\
             Kindly input a dataframe of pandas or polars type.')
         return None
 
