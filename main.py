@@ -3,7 +3,7 @@ FastAPI Application Module
 
 Name: Arowosegbe Victor\n
 Email: Iyanuvicky@gmail.com\n
-GitHub: https://github.com/Iyanuvicky22/projects
+GitHub: https://github.com/Iyanuvicky22/data_processing_comparison
 """
 import json
 import os

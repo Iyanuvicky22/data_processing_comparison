@@ -4,7 +4,7 @@ on the loaded datasets
 
 Name: Arowosegbe Victor\n
 Email: Iyanuvicky@gmail.com\n
-GitHub: https://github.com/Iyanuvicky22/projects
+GitHub: https://github.com/Iyanuvicky22/data_processing_comparison
 """
 
 import pandas as pd
