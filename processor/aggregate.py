@@ -1,9 +1,15 @@
 """
 This function perform aggregation
 of the dataset using pandas and polars.
+
+Name: Arowosegbe Victor\n
+Email: Iyanuvicky@gmail.com\n
+GitHub: https://github.com/Iyanuvicky22/projects
 """
+
 import pandas as pd
 import polars as pl
+from processor.utils.logger import logger
 
 
 def aggregate_pandas(df: pd.DataFrame):
@@ -14,10 +20,11 @@ def aggregate_pandas(df: pd.DataFrame):
         df (pd.DataFrame): _description_
     """
     try:
-        return round(df.groupby(['NameOfDay'])['Price'].
-                     agg(['sum', 'mean', 'count']), 2)
+        return round(
+            df.groupby(["NameOfDay"])["Price"].agg(["sum", "mean", "count"]), 2
+        )
     except Exception as e:
-        print(f'Error while aggregating Polars DataFrame: {e}')
+        logger.error(f"Error while aggregating Polars DataFrame:", e)
         return df
 
 
@@ -29,12 +36,13 @@ def aggregate_polars(df: pl.DataFrame):
         df (pl.DataFrame): _description_
     """
     try:
-        return df.group_by("NameOfDay").agg([pl.col("Price")
-                                            .sum().alias("sum"),
-                                            pl.col("Price")
-                                            .mean().alias("mean"),
-                                            pl.col("Price")
-                                            .count().alias("count")])
+        return df.group_by("NameOfDay").agg(
+            [
+                pl.col("Price").sum().alias("sum"),
+                pl.col("Price").mean().alias("mean"),
+                pl.col("Price").count().alias("count"),
+            ]
+        )
     except Exception as e:
-        print(f'Error while aggregating Polars DataFrame: {e}')
-        return df
+        logger.error("Error while aggregating Polars DataFrame:", e)
+    return df

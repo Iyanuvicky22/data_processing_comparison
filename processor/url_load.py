@@ -1,20 +1,30 @@
 """
 This script loads the dataset
 from the specified url.
+
+Name: Arowosegbe Victor\n
+Email: Iyanuvicky@gmail.com\n
+GitHub: https://github.com/Iyanuvicky22/projects
 """
+
 from io import BytesIO
 from zipfile import ZipFile
 import requests
-
-print("Download Starting!!!")
+from processor.utils.logger import logger
 
 URL = "https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip"
-res = requests.get(URL, timeout=20)
+FILEPATH = "data/"
 
-if res.status_code == 200:
-    with ZipFile(BytesIO(res.content)) as zip_file:
-        zip_file.extractall()
-        print('File Download Complete!!!')
-        print('File extracted successfully.')
-else:
-    print(f"Failed to download file: {res.status_code}")
+
+def extract_from_url(url: str):
+    """
+    Extracting excel data from URL
+    """
+    res = requests.get(url, timeout=20)
+    if res.status_code == 200:
+        with ZipFile(BytesIO(res.content)) as zip_file:
+            zip_file.extractall(FILEPATH)
+            logger.info("Download Successful")
+    else:
+        logger.error("Failed to download file %s ", res.status_code)
+    return res.status_code

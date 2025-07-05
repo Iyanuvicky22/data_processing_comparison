@@ -1,122 +1,180 @@
 """
 FastAPI Application Module
+
+Name: Arowosegbe Victor\n
+Email: Iyanuvicky@gmail.com\n
+GitHub: https://github.com/Iyanuvicky22/projects
 """
 import json
 import os
+from datetime import datetime
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from processor import load_data as ld
 from processor import clean as cl
 from processor import aggregate as ag
+from processor.utils import utils
+from processor.utils.logger import logger
 
 app = FastAPI()
 
-raw_pandas_df = None
-raw_polars_df = None
+RAW_PANDAS_DF = None
+RAW_POLARS_DF = None
+CURRENT_DATE = datetime.now().strftime("%d-%m-%Y")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-@app.get('/home')
+
+@app.get("/home")
 def home():
     """
     Home Function
     """
-    return '''Welcome to: Data processing packages\n
-    comparison (pandas vs polars) API project'''
+    return """Welcome to: Data processing packages comparison (pandas vs polars) API project"""
 
 
 def data_loading():
     """
     API call to load datasets.
     """
-    global raw_pandas_df, raw_polars_df
-    if raw_pandas_df is None:
-        pd_df = ld.read_pandas()
-        raw_pandas_df = pd_df
-    if raw_polars_df is None:
-        pl_df = ld.read_polars()
-        raw_polars_df = pl_df
+    try:
+        global RAW_PANDAS_DF, RAW_POLARS_DF
+        if RAW_PANDAS_DF is None:
+            pd_df = ld.read_pandas()
+            RAW_PANDAS_DF = pd_df
+        if RAW_POLARS_DF is None:
+            pl_df = ld.read_polars()
+            RAW_POLARS_DF = pl_df
+        logger.info("Data loaded successfully")
+    except Exception as e:
+        logger.error("Data loading failed! Error :-> ", e)
 
 
-@app.get('/Data Processing')
+@app.get("/Visualization (IQR)")
+async def data_spread_viz():
+    """
+    API call to visualize the data spread of the raw vs transformed data sets.
+    Returns:
+        _type_: _description_
+    """
+    try:
+        # Pandas
+        data_loading()
+        pd_na_free = cl.pd_na_handler(RAW_PANDAS_DF)
+        utils.viz_data(pd_na_free)
+        pd_df_clean = cl.handle_outlier_pandas(pd_na_free, col="Quantity",
+                                               method="cap")
+        pd_df_clean = cl.handle_outlier_pandas(
+            pd_na_free, col="Price", method="cap"
+        )
+        pd_df_trans = cl.transform_df(pd_df_clean)
+        utils.viz_data(pd_df_trans)
+
+        # Polars
+        pl_na_free = cl.pl_na_handler(RAW_POLARS_DF)
+        utils.viz_data(pl_na_free)
+        pl_df_clean = cl.handle_outlier_polars(
+            pl_na_free, col="Quantity", method="drop"
+        )
+        pl_df_clean = cl.handle_outlier_polars(
+            pl_na_free, col="Price", method="drop"
+        )
+        pl_df_trans = cl.transform_df(pl_df_clean)
+        utils.viz_data(pl_df_trans)
+        logger.info("Data visualization for data spread using IQR successful!!!")
+
+        return {
+            "message": "Data Spread Visualization Results",
+            "success": True,
+            "next step": "Check the opened tabs for IQR visualizations reports",
+        }
+    except Exception as e:
+        logger.error("Error encountered: ", e)
+        return {
+            "message": "Data Spread Visualization Results",
+            "success": False,
+            "next step": f"Resolve error {e}",
+        }
+
+
+@app.get("/Data Processing")
 async def processing():
     """
     API call to process the data sets.
     """
-    global raw_pandas_df, raw_polars_df
 
     try:
         data_loading()
-        # Pandas Cleaning
-        pd_na_free = cl.pd_na_handler(raw_pandas_df)  # Handle NA
-        cl.viz_data(pd_na_free)  # Visualize data
-        pd_df_clean = cl.handle_outlier_pandas(pd_na_free, col='Quantity',
-                                               method='cap')
-        pd_df_clean = cl.handle_outlier_pandas(pd_na_free, col='Price',
-                                               method='cap')  # Handle Outliers
-        pd_df_trans = cl.transform_df(pd_df_clean)  # Transform Clean Data
-        cl.viz_data(pd_df_trans)  # Visualize data
+        pd_na_free = cl.pd_na_handler(RAW_PANDAS_DF)
+        pd_df_clean = cl.handle_outlier_pandas(pd_na_free, col="Quantity",
+                                               method="cap")
+        pd_df_clean = cl.handle_outlier_pandas(
+            pd_na_free, col="Price", method="cap"
+        )
+        pd_df_trans = cl.transform_df(pd_df_clean)
         clean_pandas_df = pd_df_trans
 
-        # Pandas Aggregating
         pandas_aggregate = ag.aggregate_pandas(clean_pandas_df)
-
-        # Write Pandas to Json
         json_pandas = pandas_aggregate.to_json()
 
+        logger.info("Pandas Data preprocessing successful!!!")
+
         # Polars
-        pl_na_free = cl.pl_na_handler(raw_polars_df)  # Handle NA
-        cl.viz_data(pl_na_free)  # Visualize data
-        pl_df_clean = cl.handle_outlier_polars(pl_na_free, col='Quantity',
-                                               method='drop')
-        pl_df_clean = cl.handle_outlier_polars(pl_na_free, col='Price',
-                                               method='drop')  # HandleOutliers
-        pl_df_trans = cl.transform_df(pl_df_clean)  # Transform Clean Data
-        cl.viz_data(pl_df_trans)  # Visualize data
+        pl_na_free = cl.pl_na_handler(RAW_POLARS_DF)
+        pl_df_clean = cl.handle_outlier_polars(
+            pl_na_free, col="Quantity", method="drop"
+        )
+        pl_df_clean = cl.handle_outlier_polars(
+            pl_na_free, col="Price", method="drop"
+        )
+        pl_df_trans = cl.transform_df(pl_df_clean)
         clean_polars_df = pl_df_trans
 
-        # Pandas Aggregating
         polars_aggregate = ag.aggregate_polars(clean_polars_df)
-
-        # Write Polars to Json
         json_polars = polars_aggregate.write_json()
 
+        logger.info("Polars Data preprocessing successful!!!")
+
         return {
-            'message': 'Data Processing Results',
-            'success': True,
-            'data': {
-                'pandas': json.loads(json_pandas),
-                'polars': json.loads(json_polars)
-            }
+            "message": "Data Processing Results",
+            "success": True,
+            "data": {
+                "pandas": json.loads(json_pandas),
+                "polars": json.loads(json_polars),
+            },
         }
     except Exception as e:
-        print(f'Error Returned: {e}')
+        logger.error("Error encountered: ", e)
         return {
-            'message': 'Data Processing Results',
-            'success': False,
-            'next step': f'Resolve error {e}'
+            "message": "Data Processing Results",
+            "success": False,
+            "next step": f"Resolve error {e}",
         }
 
 
-@app.get('/Time Comparison')
+@app.get("/Time Comparison")
 async def time_compare():
     """
     This function show the time comparison
     between pandas and polars.
     """
-    data_loading()
+    try:
+        data_loading()
+        time_comp = ld.compare_time(ld.read_pandas, ld.read_polars)
 
-    # Loading time comparison
-    time_comp = ld.compare_time(ld.read_pandas, ld.read_polars)
-
-    # # Aggregation time comparison
-    # ld.compare_time(ag.aggregate_pandas(clean_pandas_df),
-    #                 clean_polars_df,
-    #                 action='Aggregation Time')
-    return {
-        'message': 'Time Comparison Results',
-        'status': 'Success',
-        'data': time_comp
-    }
+        logger.info("Packages (polars vs pandas) functionality speed comparison successful")
+        return {
+            "message": "Time Comparison Results",
+            "status": "Success",
+            "data": time_comp
+        }
+    except Exception as e:
+        logger.error("Error encountered: ", e)
+        return {
+            "message": "Time Comparison Results",
+            "success": False,
+            "next step": f"Resolve error {e}",
+        }
 
 
 @app.get("/download-json")
@@ -126,24 +184,28 @@ def download_json():
     """
     try:
         data_loading()
-        pl_na_free = cl.pl_na_handler(raw_polars_df)  # Handle NA
-        pl_df_clean = cl.handle_outlier_polars(pl_na_free, col='Quantity',
-                                               method='drop')
-        pl_df_clean = cl.handle_outlier_polars(pl_na_free, col='Price',
-                                               method='drop')  # HandleOutliers
-        pl_df_trans = cl.transform_df(pl_df_clean)  # Transform Clean Data
+        pl_na_free = cl.pl_na_handler(RAW_POLARS_DF)
+        pl_df_clean = cl.handle_outlier_polars(
+            pl_na_free, col="Quantity", method="drop"
+        )
+        pl_df_clean = cl.handle_outlier_polars(
+            pl_na_free, col="Price", method="drop"
+        )
+        pl_df_trans = cl.transform_df(pl_df_clean)
         clean_polars_df = pl_df_trans
-        file_path = "polars_data.json"
-        clean_polars_df.write_json_to_string(file_path)
+        file_path = f"data/polars_data_{CURRENT_DATE}.json"
+        clean_polars_df.write_json(file_path)
 
-        # check if the file exists
         if not os.path.exists(file_path):
             return f"File not found: {file_path}"
     except Exception as e:
+        logger.error("Error encountered: ", e)
         return f"Error while downloading file: {e}"
 
-    return FileResponse(file_path, media_type="application/json",
-                        filename="pandas_data.json")
+    return FileResponse(
+        file_path, media_type="application/json",
+        filename="polars_data.json"
+    )
 
 
 @app.get("/download-parquet")
@@ -153,22 +215,25 @@ def download_parquet():
     """
     try:
         data_loading()
-        # Pandas Cleaning
-        pd_na_free = cl.pd_na_handler(raw_pandas_df)  # Handle NA
-        pd_df_clean = cl.handle_outlier_pandas(pd_na_free, col='Quantity',
-                                               method='cap')
-        pd_df_clean = cl.handle_outlier_pandas(pd_na_free, col='Price',
-                                               method='cap')  # Handle Outliers
-        pd_df_trans = cl.transform_df(pd_df_clean)  # Transform Clean Data
+        pd_na_free = cl.pd_na_handler(RAW_PANDAS_DF)
+        pd_df_clean = cl.handle_outlier_pandas(pd_na_free, col="Quantity",
+                                               method="cap")
+        pd_df_clean = cl.handle_outlier_pandas(
+            pd_na_free, col="Price", method="cap"
+        )
+        pd_df_trans = cl.transform_df(pd_df_clean)
+        pd_df_trans["Description"] = pd_df_trans["Description"].astype(str)
         clean_pandas_df = pd_df_trans
-        file_path = "pandas_data.parquet"
+        file_path = f"data/pandas_data_{CURRENT_DATE}.parquet"
         clean_pandas_df.to_parquet(file_path, engine="pyarrow",
                                    compression="snappy")
 
-        # check if the file exists
         if not os.path.exists(file_path):
             return f"File not found: {file_path}"
     except Exception as e:
+        logger.error("Error encountered: ", e)
         return f"Error while downloading file: {e}"
-    return FileResponse(file_path, media_type="application/octet-stream",
-                        filename="pandas_data.parquet")
+    return FileResponse(
+        file_path, media_type="application/octet-stream",
+        filename="pandas_data.parquet"
+    )

@@ -2,27 +2,37 @@
 # **Project: Data Processing API**
 
 ## Goal:
-Build a FastAPI-based web service that processes large datasets using **Polars** and **Pandas**.
+The goal of this project is to build FastAPI-based web service that processes large datasets using **Polars** and **Pandas**,
+and comparison of the two packages performance in loading, cleaning and transforming large datasets are reviewed.
+The API is tested via an interactive `/docs` interface to reveal results of the comparison project. 
+
 The service should:
 - Load, clean, and aggregate data.
 - Expose a FastAPI endpoint to return processed results.
 - Write results to a JSON or Parquet file.
 
-You will compare **Polars** and **Pandas** performance, handle missing values,
-and test the API via the interactive `/docs` interface.
-
 ## **Project Structure**
-
 ```
-data_api/
+data_processing_api/
     ├── .gitignore
-    ├── .env.example
     ├── README.md
     ├── main.py
     ├── pyproject.toml
     ├── poetry.lock
+    ├── pictures/
+    │   ├── flowcharts
+    │   ├── api_endpoints results
+    ├── data/
+    │   ├── online_retail_ii.xlsx
+    │   ├── transformed_data.json
+    │   ├── transformed_data.parquet 
     ├── processor/
+    |   ├── utils/
+    |   |   ├── __init__.py
+    |   |   ├── logger.py
+    |   |   ├── utils.py
     │   ├── __init__.py
+    │   ├── url_load.py
     │   ├── load_data.py
     │   ├── clean.py
     │   ├── aggregate.py
@@ -31,8 +41,10 @@ data_api/
         └── test_processor.py
 ```
 
-### **Features:**
+### PROJECT MAP
+![alt text](pictures/data_processing_complete_flow.jpg)
 
+### **FEATURES**
 1. **FastAPI Endpoint**: A POST endpoint that loads, cleans, and aggregates dataset information.
 2. **Dependency Management**: Use Poetry for package management.
 3. **Virtual Environment**: Use `venv` for isolated Python environments.
@@ -41,63 +53,66 @@ data_api/
 6. **File Handling**: Save processed results in JSON and Parquet formats.
 7. **API Documentation**: Use Swagger UI (`/docs`) for interactive testing.
 
-## **Tasks**
-
-### **Task 1: Set Up Environment**
-
+### **Set Up Environment**
 1. Initialize a Python project using **Poetry**.
-2. Set up a virtual environment (`venv`) and install **FastAPI, Polars, Pandas**.
+ - `cd path` Move to the main directory you want to use for the project.
+ - `poetry new data-processing-api --name processor` This creates the project folder. 
+ - `poetry env use python(version)` This chooses the python version you want to use and also automatically creates a virtual environment for you.
+ - `poetry add package1 package2` Add main dependencies using this. 
+ - `poetry add group --vizs package1 package2` Use this to add visualization dependencies.
 
-### **Task 2: Data Loading**
 
-1. Create a script to load http://archive.ics.uci.edu/dataset/502/online+retail+ii.
-2. Implement functions to read datasets using both **Pandas** and **Polars**.
-3. Compare loading times and document findings by creating a benchmark function that returns;
-    - data loading time
-    - aggregation time.
+### **Clone Repository**
+```Clone the repository using 
+git clone https://github.com/Iyanuvicky22/Projects.git
+```
 
-Feel free to add any additional metrics you find interesting.
 
-### **Task 3: Data Cleaning**
+### **Run Project**
+```
+From the terminal run `poetry run fastapi dev main.py
+```
 
-1. Implement functions to handle missing values (e.g., fill with mean, drop rows).
-2. Apply cleaning transformations using **Pandas** and **Polars**.
-3. Document data cleaning process and reason behind your methodology.
+### **FastAPI EndPoints**
+```
+GET/home "Welcome Message"
+GET/Visualization (IQR) "Data Spread Visualizations"
+GET/Data Processing "Data Processing"
+GET/Time Comparison "Time Comparison"
+GET/download-json "Download Json"
+GET/download-parquet "Download Parquet"
+```
+![alt text](pictures/fastapi_endpoints.png)
 
-### **Task 4: Data Aggregation**
+## Example Results
+Pandas
+![alt text](pictures/pandas_insights.png)
 
-1. Group dataset by a categorical column (e.g., `category`).
-2. Compute **mean, sum, count** for a numeric column.
-3. Implement aggregation using both **Pandas** and **Polars**.
-4. Expose results via a FastAPI endpoint (`/aggregate`).
+Polars
+![alt text](pictures/polars_insights.png)
 
-### **Task 5: API Integration**
+Time Comparison
+![alt text](pictures/time_comparison_results.png)
 
-1. Create a `/process-data` endpoint.
-2. This endpoint should:
-   - Load dataset
-   - Clean and aggregate data
-   - Return processed results in JSON format.
-3. Implement error handling for invalid input formats.
+## Dependencies
+#### Main Dependencies
+`fastapi` (>=0.115.8,<0.116.0),
+`polars` (>=1.23.0,<2.0.0),
+`pandas` (>=2.2.3,<3.0.0),
+`openpyxl` (>=3.1.5,<4.0.0),
+`requests` (>=2.32.3,<3.0.0),
+`fastexcel` (>=0.14.0,<0.15.0),
+`nbformat` (>=4.2.0)
 
-### **Task 6: Saving and Retrieving Processed Data**
+#### Visualization Dependencies
+[tool.poetry.group.vizs.dependencies]
+`matplotlib` = "^3.10.1"
+`seaborn` = "^0.13.2"
+`plotly` = "^6.0.0"
 
-1. Save processed data in **JSON** and **Parquet** formats.
-2. Implement API endpoints to download these files (`/download-json`, `/download-parquet`).
+#### Code Formating Dependency
+[tool.poetry.group.dev.dependencies]
+`black` = "^25.1.0"
+`pytest-cov` = "^6.1.1"
 
-## **Deadline**
-- The project should be submitted by **Friday, February 28th, 2025, 11:59 PM**.
-
-## **Submission**
-
-- Share your **PR** in the `task-submission` channel and tag your mentors.
-- GitHub Repository: https://github.com/Data-Epic/data-wrangling/
-
-## **Rubrics**
-
-- **Completeness**: All parts of the task are implemented and working.
-- **Code Quality**: Code is clean, well-documented, and follows best practices.
-- **Testing**: Unit tests are comprehensive and cover edge cases.
-- **Git Usage**: Proper use of Git for version control, with meaningful commit messages.
-
-### Author: Arowosegbe Victor Iyanuoluwa
+### Author Arowosegbe Victor Iyanuoluwa
