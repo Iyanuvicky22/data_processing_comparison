@@ -1,3 +1,10 @@
+"""
+Data Processing Routers
+
+Name: Arowosegbe Victor\n
+Email: Iyanuvicky@gmail.com\n
+GitHub: https://github.com/Iyanuvicky22/projects
+"""
 from fastapi import APIRouter
 from fastapi.responses import FileResponse
 
@@ -29,10 +36,15 @@ async def time_compare():
 @router.get("/download-json")
 def download_json():
     path = service.export_polars_json()
-    return FileResponse(path, media_type="application/json", filename="polars_data.json")
+    return FileResponse(
+        path, media_type="application/json", filename="polars_data.json"
+    )
 
 
 @router.get("/download-parquet")
 def download_parquet():
     path = service.export_pandas_parquet()
-    return FileResponse(path, media_type="application/octet-stream", filename="pandas_data.parquet")
+    return FileResponse(
+        path, media_type="application/octet-stream", 
+        filename="pandas_data.parquet"
+    )
