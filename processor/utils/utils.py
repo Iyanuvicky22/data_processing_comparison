@@ -102,7 +102,9 @@ def check_outliers_info_polars(df: pl.DataFrame, col: str):
             iqr = q3 - q1
 
             outliers = df.filter(
-                (pl.col(col) < (q1 - 1.5 * iqr)) | (pl.col(col) > (q3 + 1.5 * iqr))
+                (pl.col(col) < (q1 - 1.5 * iqr))
+                |
+                (pl.col(col) > (q3 + 1.5 * iqr))
             )
 
             num_of_outliers = len(outliers)
