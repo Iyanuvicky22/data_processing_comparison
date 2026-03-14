@@ -1,8 +1,8 @@
 """
 Loading of extracted data using Pandas and Polars.
 
-Name: Arowosegbe Victor\n
-Email: Iyanuvicky@gmail.com\n
+Name: Arowosegbe Victor
+Email: Iyanuvicky@gmail.com
 GitHub: https://github.com/Iyanuvicky22/data_processing_comparison
 """
 
@@ -14,46 +14,36 @@ from processor.utils.logger import logger
 
 def read_pandas() -> pd.DataFrame:
     """
-    This function reads the year 2009-2010
-    xlxs file using pandas.
+    Read the 2009-2010 Excel sheet using pandas.
     """
     try:
-        df_pd = pd.read_excel("data/online_retail_II.xlsx", sheet_name=0)
-        return df_pd
+        return pd.read_excel("data/online_retail_II.xlsx", sheet_name=0)
     except Exception as e:
-        logger.error("Error encountered:", e)
+        logger.error(f"Error reading pandas data: {e}")
+        raise
 
 
 def read_polars() -> pl.DataFrame:
     """
-    This function reads the year 2010-2011
-    xlxs file using polars.
+    Read the 2010-2011 Excel sheet using polars.
     """
     try:
-        df_pl = pl.read_excel("data/online_retail_II.xlsx", sheet_id=1)
-        return df_pl
+        return pl.read_excel("data/online_retail_II.xlsx", sheet_id=1)
     except Exception as e:
-        logger.error("Error encountered:", e)
+        logger.error(f"Error reading polars data: {e}")
+        raise
 
 
-def compare_time(pd_func, pl_func, action="Loading Time") -> list:
+def measure_time(func, *args, **kwargs):
     """
-    This function compares loading
-    times of the above two functions.
+    Measure execution time of a function and return:
+    (result, elapsed_time_seconds)
     """
     try:
-        start = time.time()
-        pd_func()
-        end = time.time()
-
-        start_2 = time.time()
-        pl_func()
-        end_2 = time.time()
-
-        res = [
-            {f"Pandas {action}": round((end - start), 2)},
-            {f"Polars {action}": round((end_2 - start_2), 2)},
-        ]
+        start = time.perf_counter()
+        result = func(*args, **kwargs)
+        end = time.perf_counter()
+        return result, round(end - start, 6)
     except Exception as e:
-        logger.error("Error encountered:", e)
-    return res
+        logger.error(f"Error timing function {func.__name__}: {e}")
+        raise

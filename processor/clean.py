@@ -116,7 +116,7 @@ def handle_outlier_polars(df: pl.DataFrame, column: str, method="cap"):
                 lower=pl.col('q1_drop') - 1.5 * pl.col('iqr_drop'),
                 upper=pl.col('q3_drop') + 1.5 * pl.col('iqr_drop')
             ).filter(
-                (pl.col(column) >= pl.col('lower')) 
+                (pl.col(column) >= pl.col('lower'))
                 &
                 (pl.col(column) <= pl.col('upper'))
             ).drop(['q1_drop', 'q3_drop', 'iqr_drop', 'lower', 'upper'])

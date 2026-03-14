@@ -47,7 +47,7 @@ def viz_data(df: pd.DataFrame | pl.DataFrame, columns=None):
     except AttributeError as e:
         logger.error(
             f"Data loaded is not a polars or pandas dataframe.\
-        It is {e}"
+            It is {e}"
         )
 
 
@@ -116,6 +116,6 @@ def check_outliers_info_polars(df: pl.DataFrame, col: str):
                 "Min Outlier Value": min_outlier,
             }
     except NameError:
-        print("Column not in dataframe columns.")
+        logger.error("Column not in dataframe columns.")
     except TypeError:
-        print("Column not integer or float type.")
+        logger.error("Column not integer or float type.")
