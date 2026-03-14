@@ -86,6 +86,7 @@ def benchmark_pandas_pipeline():
 
     pd_df, load_time = ld.measure_time(ld.read_pandas)
     timings["load_time_seconds"] = load_time
+    timings["memory_usage_mb"] = round(pd_df.memory_usage(deep=True).sum() / (1024 ** 2), 4)
 
     df = cl.pd_na_handler(pd_df)
     df = cl.handle_outlier_pandas(df, col="Quantity", method="cap")
@@ -117,6 +118,7 @@ def benchmark_polars_pipeline():
 
     pl_df, load_time = ld.measure_time(ld.read_polars)
     timings["load_time_seconds"] = load_time
+    timings["memory_usage_mb"] = round(pl_df.estimated_size() / (1024 ** 2), 4)
 
     df = cl.pl_na_handler(pl_df)
     df = cl.handle_outlier_polars(df, column="Quantity", method="drop")
