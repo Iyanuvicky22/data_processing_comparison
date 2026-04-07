@@ -42,8 +42,8 @@ def preprocess_pandas():
         ensure_data_loaded()
 
         df = cl.pd_na_handler(RAW_PANDAS_DF)
-        df = cl.handle_outlier_pandas(df, col="Quantity", method="cap")
-        df = cl.handle_outlier_pandas(df, col="Price", method="cap")
+        df = cl.handle_outlier_pandas(df, col="Quantity", method="drop")
+        df = cl.handle_outlier_pandas(df, col="Price", method="drop")
         df = cl.transform_df(df)
 
         return df
