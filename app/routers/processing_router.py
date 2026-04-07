@@ -34,7 +34,7 @@ async def processing():
 
 
 @router.get("/time-comparison")
-async def time_compare():
+async def time_comparison():
     result = service.compare_time()
     logger.info("Benchmark Time Comparison successful!")
     return result

@@ -27,7 +27,7 @@ def pd_na_handler(df: pd.DataFrame):
         df.loc[:, "Customer ID"] = df["Customer ID"].ffill()
         return df
     except Exception as e:
-        logger.error("Error Encountered", e)
+        logger.error("Error Encountered %s", e)
 
 
 def pl_na_handler(df: pl.DataFrame):
@@ -46,7 +46,7 @@ def pl_na_handler(df: pl.DataFrame):
         df = df.fill_null(strategy="forward")
         return df
     except Exception as e:
-        logger.error("Error Encountered", e)
+        logger.error("Error Encountered %s", e)
 
 
 def handle_outlier_pandas(df: pd.DataFrame, col: str, method="cap"):
@@ -187,7 +187,9 @@ def transform_df(df: pd.DataFrame | pl.DataFrame) -> pd.DataFrame | pl.DataFrame
                     pl.col("InvoiceDateTime").dt.time().alias("InvoiceTime")
                 )
                 df = df.with_columns(
-                    pl.col("InvoiceDateTime").dt.strftime("%A").alias("NameOfDay")
+                    pl.col("InvoiceDateTime").dt.strftime("%A").alias(
+                        "NameOfDay"
+                    )
                 )
             return df
         if isinstance(df, pd.DataFrame):
@@ -213,4 +215,4 @@ def transform_df(df: pd.DataFrame | pl.DataFrame) -> pd.DataFrame | pl.DataFrame
         )
         return None
     except Exception as e:
-        logger.error("Error Encountered", e)
+        logger.error("Error Encountered %s", e)

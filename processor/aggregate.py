@@ -21,10 +21,10 @@ def aggregate_pandas(df: pd.DataFrame):
     """
     try:
         return round(
-            df.groupby(["NameOfDay"])["Price"].agg(["sum", "mean", "count"]), 2
-        )
+            df.groupby(["NameOfDay"])["Price"].agg(
+                ["sum", "mean", "median", "count"]), 2).round(2)
     except Exception as e:
-        logger.error(f"Error while aggregating Polars DataFrame:", e)
+        logger.error("Error while aggregating Pandas DataFrame: %s", e)
         return df
 
 
@@ -38,11 +38,12 @@ def aggregate_polars(df: pl.DataFrame):
     try:
         return df.group_by("NameOfDay").agg(
             [
-                pl.col("Price").sum().alias("sum"),
-                pl.col("Price").mean().alias("mean"),
+                pl.col("Price").sum().round(2).alias("sum"),
+                pl.col("Price").mean().round(2).alias("mean"),
+                pl.col("Price").median().round(2).alias("median"),
                 pl.col("Price").count().alias("count"),
             ]
         )
     except Exception as e:
-        logger.error("Error while aggregating Polars DataFrame:", e)
+        logger.error("Error while aggregating Polars DataFrame: %s", e)
     return df
